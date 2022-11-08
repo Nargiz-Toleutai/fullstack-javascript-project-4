@@ -3,7 +3,15 @@ import path from 'path';
 import os from 'os';
 import pageLoader from '../src/index';
 
-const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+let tempDir;
+
+beforeEach(async () => {
+  tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+});
+
+afterEach(() => {
+  tempDir = null;
+});
 
 test('test1', async () => {
   const url = 'https://ru.hexlet.io/courses';
