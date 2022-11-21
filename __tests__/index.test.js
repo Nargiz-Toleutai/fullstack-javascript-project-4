@@ -4,19 +4,12 @@ import path from 'path';
 import os from 'os';
 import nock from 'nock';
 import pageLoader, { replaceUrls } from '../src/index';
-import copyImages from '../src/copyImage';
+import copyResourses from '../src/copyResourses';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 const getFixturePath = (name) => path.join(dirname, '..', '__fixtures__', name);
-
-// const files = [
-//   ['filepath1.json', 'filepath2.json', 'stylish'],
-//   ['filepath1.json', 'filepath2.json', 'json'],
-//   ['filepath1.json', 'filepath2.json', 'plain'],
-//   ['filepath1.yml', 'filepath2.yaml'],
-// ];
 
 let tempDir;
 
@@ -28,6 +21,7 @@ const server = () => {
     .replyWithFile(200, path.join(dirname, '..', '__fixtures__/courses.html'), {
       'Content-Type': 'text/html',
     });
+
   nock('https://ru.hexlet.io')
     .persist()
     .get('/assets/professions/nodejs.png')
@@ -38,6 +32,30 @@ const server = () => {
     .persist()
     .get('/courses')
     .replyWithFile(200, path.join(dirname, '..', '__fixtures__/coursesResult.html'), {
+      'Content-Type': 'text/html',
+    });
+  nock('https://ru.hexlet.io')
+    .persist()
+    .get('/assets/application.css')
+    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
+      'Content-Type': 'text/html',
+    });
+  nock('https://ru.hexlet.io')
+    .persist()
+    .get('/courses')
+    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
+      'Content-Type': 'text/html',
+    });
+  nock('https://ru.hexlet.io')
+    .persist()
+    .get('/assets/professions/nodejs.png')
+    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
+      'Content-Type': 'image/png',
+    });
+  nock('https://ru.hexlet.io')
+    .persist()
+    .get('/packs/js/runtime.js')
+    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
       'Content-Type': 'text/html',
     });
 };
@@ -60,19 +78,42 @@ test('download page', async () => {
   expect(link).toEqual(expected);
 });
 
-test('change urls', async () => {
-  const data = await fs.readFile(getFixturePath('courses.html'), 'utf-8');
-  const link = await copyImages(url, data, tempDir);
+test('originalUrl and replace urls with attributes', async () => {
+  const data = await fs.readFile(getFixturePath('otherResourses.html'), 'utf-8');
+  const link = await copyResourses(url, tempDir, data);
   const expected = {
-    '/assets/professions/nodejs.png': 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
+    '/assets/application.css': {
+      attr: 'href',
+      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
+    },
+    '/assets/professions/nodejs.png': {
+      attr: 'src',
+      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
+    },
+    '/courses': {
+      attr: 'href',
+      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
+    },
+    'https://ru.hexlet.io/packs/js/runtime.js': {
+      attr: 'src',
+      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js',
+    },
   };
   expect(link).toEqual(expected);
 });
 
-test('change url in html file', async () => {
+test('change urls in courses html file', async () => {
   const data = await fs.readFile(getFixturePath('courses.html'), 'utf-8');
-  const imagePaths = await copyImages(url, data, tempDir);
+  const imagePaths = await copyResourses(url, tempDir, data);
   const actual = replaceUrls(data, imagePaths);
   const expected = await fs.readFile(getFixturePath('coursesResult.html'), 'utf-8');
+  expect(actual).toEqual(expected);
+});
+
+test('change urls in otherResourses html file', async () => {
+  const data = await fs.readFile(getFixturePath('otherResourses.html'), 'utf-8');
+  const imagePaths = await copyResourses(url, tempDir, data);
+  const actual = replaceUrls(data, imagePaths);
+  const expected = await fs.readFile(getFixturePath('otherResoursesResult.html'), 'utf-8');
   expect(actual).toEqual(expected);
 });
