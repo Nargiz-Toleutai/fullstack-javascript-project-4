@@ -24,8 +24,9 @@ const request = async (requestUrls, downloadedResoursesPaths, projectDir, newFil
       attr: urlAttr[idx],
       newPath: newFilePath + downloadedResoursesPath,
     };
-    await fs.writeFile(imagePath, response.data);
+    await await fs.writeFile(imagePath, response.data);
   }));
+
   return result;
 };
 
@@ -44,9 +45,14 @@ const resoursesPaths = (data, host, origin) => {
 
 const createProjectDir = async (currentDir, newFilePath) => {
   const fullPath = await path.resolve(currentDir, newFilePath);
-  const projectFolder = new URL(fullPath, import.meta.url);
-  const projectDir = await mkdir(projectFolder, { recursive: true });
-  return projectDir;
+  try {
+    const projectFolder = new URL(fullPath, import.meta.url);
+    const projectDir = await mkdir(projectFolder, { recursive: true });
+    // console.log(projectFolder.pathname, projectDir);
+    return projectDir ?? projectFolder.pathname;
+  } catch (err) {
+    return err;
+  }
 };
 
 const findResourses = (data, host, protocol) => {
@@ -54,6 +60,7 @@ const findResourses = (data, host, protocol) => {
 
   const findLinks = (sel, attr) => Object.fromEntries($('html').find(sel).toArray()
     .map((el) => $(el).attr(attr))
+    .filter(Boolean)
     .filter((elem) => elem.match(host) || !elem.startsWith(protocol))
     .map((elem) => [elem, { attr }]));
 
@@ -69,13 +76,22 @@ const copyResourses = async (pagePath, currentDir, data) => {
   const { protocol, host, origin } = url;
 
   const newUrl = pagePath.replace(protocol, '');
-  const newFilePath = newUrl.replace(reg1, '-').slice(1).concat('_files');
+
+  // console.log({ newUrl });
+  const newFilePath = newUrl
+    .replace(/^\/\//, '')
+    .replace(/\/$/, '')
+    .replace(reg1, '-')
+    .concat('_files');
 
   const urls = findResourses(data, host, protocol);
+
   const requestUrls = Object.keys(urls).map((elem) => ((elem.match(origin))
     ? elem
     : `${protocol}//${host}${elem}`));
+
   const downloadedResoursesPaths = resoursesPaths(Object.keys(urls), host, origin);
+
   const projectDir = await createProjectDir(currentDir, newFilePath);
 
   return request(

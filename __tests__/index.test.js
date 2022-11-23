@@ -1,66 +1,66 @@
+/* eslint-disable import/extensions */
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 import nock from 'nock';
-import pageLoader, { replaceUrls } from '../src/index';
-import copyResourses from '../src/copyResourses';
+import pageLoader, { replaceUrls } from '../src/index.js';
+import copyResourses from '../src/copyResourses.js';
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const getFixturePath = (name) => path.join(dirname, '..', '__fixtures__', name);
-
-let tempDir;
+const getFixturePath = (name) => path.join(__dirname, '..', '__fixtures__', name);
 
 const url = 'https://ru.hexlet.io/courses';
 
 const server = () => {
   nock('https://ru.hexlet.io')
     .get('/courses')
-    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/courses.html'), {
+    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/courses.html'), {
       'Content-Type': 'text/html',
     });
-
   nock('https://ru.hexlet.io')
     .persist()
     .get('/assets/professions/nodejs.png')
-    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/node.png'), {
+    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/node.png'), {
       'Content-Type': 'image/png',
     });
   nock('https://ru.hexlet.io')
     .persist()
     .get('/courses')
-    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/coursesResult.html'), {
+    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/coursesResult.html'), {
       'Content-Type': 'text/html',
     });
   nock('https://ru.hexlet.io')
     .persist()
     .get('/assets/application.css')
-    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
+    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
       'Content-Type': 'text/html',
     });
   nock('https://ru.hexlet.io')
     .persist()
     .get('/courses')
-    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
+    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
       'Content-Type': 'text/html',
     });
   nock('https://ru.hexlet.io')
     .persist()
     .get('/assets/professions/nodejs.png')
-    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
+    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
       'Content-Type': 'image/png',
     });
   nock('https://ru.hexlet.io')
     .persist()
     .get('/packs/js/runtime.js')
-    .replyWithFile(200, path.join(dirname, '..', '__fixtures__/otherResourses.html'), {
+    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
       'Content-Type': 'text/html',
     });
 };
 
 server();
+
+let tempDir;
 
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
