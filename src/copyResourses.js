@@ -2,32 +2,37 @@ import cheerio from 'cheerio';
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
+import Listr from 'listr';
 import { mkdir } from 'node:fs/promises';
 import { URL } from 'url';
 
-const request = async (requestUrls, downloadedResoursesPaths, projectDir, newFilePath, urls) => {
-  const responses = await Promise.all(requestUrls.map((requestUrl) => axios({
-    method: 'get',
-    url: requestUrl,
-    responseType: 'arraybuffer',
-    encoding: null,
-  }).catch(() => { throw new Error('invalid page path'); })));
-
-  const result = {};
-
-  await Promise.all(responses.map(async (response, idx) => {
-    const downloadedResoursesPath = downloadedResoursesPaths[idx];
-    const imagePath = projectDir + downloadedResoursesPath;
-    const urlAttr = Object.values(urls).map((elem) => elem.attr);
-    const urlPath = Object.keys(urls).map((elem) => elem);
-    result[urlPath[idx]] = {
-      attr: urlAttr[idx],
-      newPath: newFilePath + downloadedResoursesPath,
-    };
-    await await fs.writeFile(imagePath, response.data);
-  }));
-
-  return result;
+const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFilePath, urls) => {
+  const requestsMap = [];
+  const tasks = new Listr(
+    requestUrls.map((requestUrl, idx) => ({
+      title: requestUrl,
+      task: async () => {
+        const response = await axios({
+          method: 'get',
+          url: requestUrl,
+          responseType: 'arraybuffer',
+          encoding: null,
+        }).catch(() => { throw new Error('invalid page path'); });
+        const downloadedResoursesPath = downloadedResoursesPaths[idx];
+        const imagePath = projectDir + downloadedResoursesPath;
+        const urlAttr = Object.values(urls).map((elem) => elem.attr);
+        const urlPath = Object.keys(urls).map((elem) => elem);
+        await fs.writeFile(imagePath, response.data);
+        requestsMap.push([[urlPath[idx]], {
+          attr: urlAttr[idx],
+          newPath: newFilePath + downloadedResoursesPath,
+        }]);
+      },
+    })),
+    { concurrent: true },
+  );
+  await tasks.run();
+  return Object.fromEntries(requestsMap);
 };
 
 const reg1 = /[^a-z0-9]+/g;
@@ -92,7 +97,7 @@ const copyResourses = async (pagePath, currentDir, data) => {
 
   const projectDir = await createProjectDir(currentDir, newFilePath);
 
-  return request(
+  return requests(
     requestUrls,
     downloadedResoursesPaths,
     projectDir,
