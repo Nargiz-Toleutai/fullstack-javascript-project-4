@@ -27,3 +27,6 @@
 
 ### Debugging
 [![asciicast](https://asciinema.org/a/RLHCQFhnf8ihhONoIul2fI4Ei.svg)](https://asciinema.org/a/RLHCQFhnf8ihhONoIul2fI4Ei)
+
+### Progress display
+[![asciicast](https://asciinema.org/a/NGAdeyUtIOaPpmfZ1naPuKREO.svg)](https://asciinema.org/a/NGAdeyUtIOaPpmfZ1naPuKREO)

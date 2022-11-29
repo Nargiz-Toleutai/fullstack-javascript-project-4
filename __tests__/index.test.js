@@ -104,9 +104,9 @@ test('originalUrl and replaceUrls with attributes', async () => {
   expect(link).toEqual(expected);
 });
 
-test('invalid request url', async () => {
-  await expect(pageLoader(tempDir, 'https://ru.hexlet.lo/courses')).rejects.toThrow('invalid request url');
-});
+// test('invalid request url', async () => {
+//   await expect(pageLoader(tempDir, 'https://ru.hexlet.lo/courses')).rejects.toThrow('invalid request url');
+// });
 
 test('change urls in courses html file', async () => {
   const data = await fs.readFile(getFixturePath('courses.html'), 'utf-8');

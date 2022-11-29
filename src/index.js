@@ -18,7 +18,7 @@ export const replaceUrls = (data, imagePaths) => {
 
 const pageLoader = async (currentDir, requestUrl) => {
   if (!requestUrl) { throw new Error('no request url provided'); }
-  const data = await axios.get(requestUrl).catch(() => { throw new Error(`invalid request url ${requestUrl}`); });
+  const data = await axios.get(requestUrl);
 
   debug('page-loader: pageLoader')(`${data.data}`);
   const { url } = data.config;
