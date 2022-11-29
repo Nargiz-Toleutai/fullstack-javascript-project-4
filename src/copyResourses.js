@@ -11,7 +11,7 @@ const request = async (requestUrls, downloadedResoursesPaths, projectDir, newFil
     url: requestUrl,
     responseType: 'arraybuffer',
     encoding: null,
-  })));
+  }).catch(() => { throw new Error('invalid page path'); })));
 
   const result = {};
 
@@ -48,7 +48,6 @@ const createProjectDir = async (currentDir, newFilePath) => {
   try {
     const projectFolder = new URL(fullPath, import.meta.url);
     const projectDir = await mkdir(projectFolder, { recursive: true });
-    // console.log(projectFolder.pathname, projectDir);
     return projectDir ?? projectFolder.pathname;
   } catch (err) {
     return err;
@@ -77,7 +76,6 @@ const copyResourses = async (pagePath, currentDir, data) => {
 
   const newUrl = pagePath.replace(protocol, '');
 
-  // console.log({ newUrl });
   const newFilePath = newUrl
     .replace(/^\/\//, '')
     .replace(/\/$/, '')

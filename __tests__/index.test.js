@@ -72,13 +72,15 @@ afterEach(() => {
 
 test('download page', async () => {
   const link = await pageLoader(tempDir, url);
-  const expected = [
-    `Page was successfully downloaded into ${tempDir}/ru-hexlet-io-courses.html`,
-  ];
+  const expected = `Page was successfully downloaded into ${tempDir}/ru-hexlet-io-courses.html`;
   expect(link).toEqual(expected);
 });
 
-test('originalUrl and replace urls with attributes', async () => {
+test('fails with error when no url provided', async () => {
+  await expect(pageLoader(tempDir, '')).rejects.toThrow('no request url provided');
+});
+
+test('originalUrl and replaceUrls with attributes', async () => {
   const data = await fs.readFile(getFixturePath('otherResourses.html'), 'utf-8');
   const link = await copyResourses(url, tempDir, data);
   const expected = {
@@ -100,6 +102,10 @@ test('originalUrl and replace urls with attributes', async () => {
     },
   };
   expect(link).toEqual(expected);
+});
+
+test('invalid request url', async () => {
+  await expect(pageLoader(tempDir, 'https://ru.hexlet.lo/courses')).rejects.toThrow('invalid request url');
 });
 
 test('change urls in courses html file', async () => {

@@ -25,6 +25,7 @@
     "commander": "^9.4.1",
     "debug": "^4.3.4",
     "jest-cli": "^29.2.2",
+    "listr": "^0.14.3",
     "supports-color": "^9.2.3"
   },
   "devDependencies": {

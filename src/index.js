@@ -17,7 +17,9 @@ export const replaceUrls = (data, imagePaths) => {
 };
 
 const pageLoader = async (currentDir, requestUrl) => {
-  const data = await axios.get(requestUrl);
+  if (!requestUrl) { throw new Error('no request url provided'); }
+  const data = await axios.get(requestUrl).catch(() => { throw new Error(`invalid request url ${requestUrl}`); });
+
   debug('page-loader: pageLoader')(`${data.data}`);
   const { url } = data.config;
   const urlData = new URL(url);
@@ -25,21 +27,12 @@ const pageLoader = async (currentDir, requestUrl) => {
   const newUrl = url.replace(protocol, '');
   const reg = /[^a-z0-9-]+/g;
 
-  const newFilePath = newUrl.replace(reg, '-').slice(1).concat('.html'); // page-loader-hexlet-repl.co.html
-  // const newFilePath = newUrl
-  //   .replace(/^\/\//, '')
-  //   .replace(/\/$/, '')
-  //   .replace(/[.](?=.*[.])/g, '-')
-  //   .concat('.html');
-  // console.log({
-  //   currentDir, requestUrl, newFilePath, newUrl,
-  // });
+  const newFilePath = newUrl.replace(reg, '-').slice(1).concat('.html');
   const fullPath = path.resolve(currentDir, newFilePath);
   const imagePaths = await copyResourses(requestUrl, currentDir, data.data);
   const result = replaceUrls(data.data, imagePaths);
   await fs.writeFile(fullPath, result);
-  return [`Page was successfully downloaded into ${fullPath}`];
+  return `Page was successfully downloaded into ${fullPath}`;
 };
 
 export default pageLoader;
-// page-loader-hexlet-repl.co.html

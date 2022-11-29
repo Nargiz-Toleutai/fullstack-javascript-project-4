@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-
+import process from 'node:process';
 // eslint-disable-next-line import/extensions
 import pageLoader from './src/index.js';
 
@@ -10,7 +10,13 @@ program
   .option('-o, --output [dir]', 'output dir', process.cwd())
   .arguments('<url>')
   .action((url, options) => {
-    pageLoader(options.output, url);
+    try {
+      pageLoader(options.output, url);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed execution: ${e}`);
+      process.exit(1);
+    }
   });
 
 program.parse();
