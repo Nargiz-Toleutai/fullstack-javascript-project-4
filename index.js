@@ -11,7 +11,7 @@ program
   .arguments('<url>')
   .action((url, options) => {
     try {
-      pageLoader(options.output, url);
+      pageLoader(url, options.output);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(`Failed execution: ${e}`);

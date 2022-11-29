@@ -71,13 +71,13 @@ afterEach(() => {
 });
 
 test('download page', async () => {
-  const link = await pageLoader(tempDir, url);
+  const link = await pageLoader(url, tempDir);
   const expected = `Page was successfully downloaded into ${tempDir}/ru-hexlet-io-courses.html`;
   expect(link).toEqual(expected);
 });
 
 test('fails with error when no url provided', async () => {
-  await expect(pageLoader(tempDir, '')).rejects.toThrow('no request url provided');
+  await expect(pageLoader('', tempDir)).rejects.toThrow('no request url provided');
 });
 
 test('originalUrl and replaceUrls with attributes', async () => {

@@ -16,7 +16,7 @@ export const replaceUrls = (data, imagePaths) => {
   return $.html();
 };
 
-const pageLoader = async (currentDir, requestUrl) => {
+const pageLoader = async (requestUrl, currentDir) => {
   console.log({ currentDir, requestUrl });
   if (!requestUrl) { throw new Error('no request url provided'); }
 
