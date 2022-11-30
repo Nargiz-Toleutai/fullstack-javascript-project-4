@@ -80,6 +80,14 @@ test('fails with error when no url provided', async () => {
   await expect(pageLoader('', tempDir)).rejects.toThrow('no request url provided');
 });
 
+test('invalid directory', async () => {
+  await expect(pageLoader(url, '/sys/site-com-blog-about_files/site-com-photos-me.jpg')).rejects.toThrow('directory does not exist');
+});
+
+test('invalid request url', async () => {
+  await expect(pageLoader('https://site.com/blog/about ', tempDir)).rejects.toThrow('invalid request url');
+});
+
 test('originalUrl and replaceUrls with attributes', async () => {
   const data = await fs.readFile(getFixturePath('otherResourses.html'), 'utf-8');
   const link = await copyResourses(url, tempDir, data);
@@ -103,10 +111,6 @@ test('originalUrl and replaceUrls with attributes', async () => {
   };
   expect(link).toEqual(expected);
 });
-
-// test('invalid request url', async () => {
-//   await expect(pageLoader(tempDir, 'https://ru.hexlet.lo/courses')).rejects.toThrow('invalid request url');
-// });
 
 test('change urls in courses html file', async () => {
   const data = await fs.readFile(getFixturePath('courses.html'), 'utf-8');

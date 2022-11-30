@@ -3,10 +3,11 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
 import Listr from 'listr';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, access } from 'node:fs/promises';
 import { URL } from 'url';
 
 const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFilePath, urls) => {
+  console.log({ requestUrls, projectDir });
   const requestsMap = [];
   const tasks = new Listr(
     requestUrls.map((requestUrl, idx) => ({
@@ -17,7 +18,7 @@ const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFi
           url: requestUrl,
           responseType: 'arraybuffer',
           encoding: null,
-        }).catch(() => { throw new Error('invalid page path'); });
+        }).catch(() => { throw new Error('directory does not exist'); });
         const downloadedResoursesPath = downloadedResoursesPaths[idx];
         const imagePath = projectDir + downloadedResoursesPath;
         const urlAttr = Object.values(urls).map((elem) => elem.attr);
