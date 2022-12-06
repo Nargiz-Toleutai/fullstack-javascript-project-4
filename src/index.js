@@ -5,7 +5,6 @@ import path from 'path';
 import { URL } from 'url';
 import cheerio from 'cheerio';
 import debug from 'debug';
-import { access, constants } from 'node:fs/promises';
 import copyResourses from './copyResourses.js';
 
 export const replaceUrls = (data, imagePaths) => {
@@ -18,10 +17,9 @@ export const replaceUrls = (data, imagePaths) => {
 };
 
 const pageLoader = async (requestUrl, currentDir) => {
-  // console.log({ currentDir, requestUrl });
   if (!requestUrl) { throw new Error('no request url provided'); }
-  const data = await axios.get(requestUrl).catch(() => {
-    throw new Error('invalid request url');
+  const data = await axios.get(requestUrl).catch((e) => {
+    throw new Error(e);
   });
   debug('page-loader: pageLoader')(`${data.data}`);
   const { url } = data.config;
@@ -30,16 +28,12 @@ const pageLoader = async (requestUrl, currentDir) => {
   const newUrl = url.replace(protocol, '');
   const reg = /[^a-z0-9-]+/g;
   const newFilePath = newUrl.replace(reg, '-').slice(1).concat('.html');
-  try {
-    await access(currentDir, constants.R_OK | constants.W_OK);
-  } catch {
-    console.error('directory does not exist');
-  }
+
   const fullPath = path.resolve(currentDir, newFilePath);
   const imagePaths = await copyResourses(requestUrl, currentDir, data.data);
   const result = replaceUrls(data.data, imagePaths);
   await fs.writeFile(fullPath, result);
-  return `Page was successfully downloaded into ${fullPath}`;
+  return fullPath;
 };
 
 export default pageLoader;

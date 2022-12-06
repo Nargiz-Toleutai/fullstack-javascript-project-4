@@ -4,61 +4,16 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 import nock from 'nock';
-import pageLoader, { replaceUrls } from '../src/index.js';
-import copyResourses from '../src/copyResourses.js';
+import { createReadStream } from 'fs';
+import pageLoader from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const getFixturePath = (name) => path.join(__dirname, '..', '__fixtures__', name);
+const readFixtureFile = (filename) => fs.readFile(getFixturePath(filename), 'utf-8');
 
 const url = 'https://ru.hexlet.io/courses';
-
-const server = () => {
-  nock('https://ru.hexlet.io')
-    .get('/courses')
-    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/courses.html'), {
-      'Content-Type': 'text/html',
-    });
-  nock('https://ru.hexlet.io')
-    .persist()
-    .get('/assets/professions/nodejs.png')
-    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/node.png'), {
-      'Content-Type': 'image/png',
-    });
-  nock('https://ru.hexlet.io')
-    .persist()
-    .get('/courses')
-    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/coursesResult.html'), {
-      'Content-Type': 'text/html',
-    });
-  nock('https://ru.hexlet.io')
-    .persist()
-    .get('/assets/application.css')
-    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
-      'Content-Type': 'text/html',
-    });
-  nock('https://ru.hexlet.io')
-    .persist()
-    .get('/courses')
-    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
-      'Content-Type': 'text/html',
-    });
-  nock('https://ru.hexlet.io')
-    .persist()
-    .get('/assets/professions/nodejs.png')
-    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
-      'Content-Type': 'image/png',
-    });
-  nock('https://ru.hexlet.io')
-    .persist()
-    .get('/packs/js/runtime.js')
-    .replyWithFile(200, path.join(__dirname, '..', '__fixtures__/otherResourses.html'), {
-      'Content-Type': 'text/html',
-    });
-};
-
-server();
 
 let tempDir;
 
@@ -70,60 +25,172 @@ afterEach(() => {
   tempDir = null;
 });
 
-test('download page', async () => {
-  const link = await pageLoader(url, tempDir);
-  const expected = `Page was successfully downloaded into ${tempDir}/ru-hexlet-io-courses.html`;
-  expect(link).toEqual(expected);
+describe('return correct path', () => {
+  const filename = 'ru-hexlet-io-courses.html';
+
+  test('in default directory', async () => {
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, 'OK');
+
+    const tmpPageFilePath = path.join(tempDir, filename);
+    const actual = await pageLoader(url, tempDir);
+    expect(scope.isDone()).toBe(true);
+    expect(actual).toBe(tmpPageFilePath);
+  });
+
+  test('in optional directory', async () => {
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, 'OK');
+    const optionalDirectoryPath = '/var/tmp';
+    const tmpPageDirpath = path.join(tempDir, optionalDirectoryPath);
+    await fs.mkdir(tmpPageDirpath, { recursive: true });
+    const tmpPageFilePath = path.join(tmpPageDirpath, filename);
+    const result = await pageLoader(url, tmpPageDirpath);
+    expect(scope.isDone()).toBe(true);
+    expect(result).toBe(tmpPageFilePath);
+  });
 });
 
-test('fails with error when no url provided', async () => {
-  await expect(pageLoader('', tempDir)).rejects.toThrow('no request url provided');
+describe('checks files existence and its content', () => {
+  test('in default directory', async () => {
+    const responseHtml = await readFixtureFile('courses.html');
+    const expectedHtml = await readFixtureFile('ru-hexlet-io-courses.html');
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, responseHtml)
+      .get('/assets/professions/nodejs.png')
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')));
+
+    const result = await pageLoader(url, tempDir);
+    const resultedHtml = await fs.readFile(result, 'utf-8');
+    expect(scope.isDone()).toBe(true);
+    expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+  });
+  test('check downloading images', async () => {
+    const htmlToResponse = await readFixtureFile('courses.html');
+    const expectedHtml = await readFixtureFile('coursesResult.html');
+    const expectedImage = await readFixtureFile('nodejs.png');
+    const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
+    // console.log({ aa: createReadStream(getFixturePath('nodejs.png')) });
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/professions/nodejs.png')
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')));
+
+    const result = await pageLoader(url, tempDir);
+    const resultedHtml = await fs.readFile(result, 'utf-8');
+    const downloadedImagePath = path.join(tempDir, 'ru-hexlet-io-courses_files', imageFilename);
+    const resultedImage = await fs.readFile(downloadedImagePath, 'utf-8');
+
+    expect(scope.isDone()).toBe(true);
+    expect(resultedImage.trim()).toBe(expectedImage.trim());
+    expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+  });
+  test('check downloading links and scripts', async () => {
+    const htmlToResponse = await readFixtureFile('otherResourses.html');
+    const expectedHtml = await readFixtureFile('otherResoursesResult.html');
+    const expectedCSS = await readFixtureFile('application.css');
+    const CSSFilename = 'ru-hexlet-io-assets-application.css';
+    const expectedRelatedHtml = await readFixtureFile('otherResourses.html');
+    const relatedHtmlFilename = 'ru-hexlet-io-courses.html';
+    const expectedJS = await readFixtureFile('runtime.js');
+    const JSFilename = 'ru-hexlet-io-packs-js-runtime.js';
+
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/application.css')
+      .replyWithFile(200, getFixturePath('application.css'), {
+        'Cotent-Type': 'text/css',
+      })
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/packs/js/runtime.js')
+      .replyWithFile(200, getFixturePath('runtime.js'), {
+        'Cotent-Type': 'text/javascript',
+      })
+      .get('/assets/professions/nodejs.png')
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')));
+
+    const result = await pageLoader(url, tempDir);
+    const resultedHtml = await fs.readFile(result, 'utf-8');
+    const downloadedCSSPath = path.join(tempDir, 'ru-hexlet-io-courses_files', CSSFilename);
+    const resultedCSS = await fs.readFile(downloadedCSSPath, 'utf-8');
+    const downloadedRelatedHtmlPath = path.join(tempDir, 'ru-hexlet-io-courses_files', relatedHtmlFilename);
+
+    const resultedRelatedHtml = await fs.readFile(downloadedRelatedHtmlPath, 'utf-8');
+    const downloadedJSPath = path.join(tempDir, 'ru-hexlet-io-courses_files', JSFilename);
+    const resultedJS = await fs.readFile(downloadedJSPath, 'utf-8');
+
+    expect(scope.isDone()).toBe(true);
+    expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+    expect(resultedCSS.trim()).toBe(expectedCSS.trim());
+    expect(resultedRelatedHtml.trim()).toBe(expectedRelatedHtml.trim());
+    expect(resultedJS.trim()).toBe(expectedJS.trim());
+  });
 });
 
-test('invalid directory', async () => {
-  await expect(pageLoader(url, '/sys/site-com-blog-about_files/site-com-photos-me.jpg')).rejects.toThrow('directory does not exist');
-});
+//= == 3
 
-test('invalid request url', async () => {
-  await expect(pageLoader('https://site.com/blog/about ', tempDir)).rejects.toThrow('invalid request url');
-});
-
-test('originalUrl and replaceUrls with attributes', async () => {
-  const data = await fs.readFile(getFixturePath('otherResourses.html'), 'utf-8');
-  const link = await copyResourses(url, tempDir, data);
-  const expected = {
-    '/assets/application.css': {
-      attr: 'href',
-      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
-    },
-    '/assets/professions/nodejs.png': {
-      attr: 'src',
-      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
-    },
-    '/courses': {
-      attr: 'href',
-      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
-    },
-    'https://ru.hexlet.io/packs/js/runtime.js': {
-      attr: 'src',
-      newPath: 'ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js',
-    },
-  };
-  expect(link).toEqual(expected);
-});
-
-test('change urls in courses html file', async () => {
-  const data = await fs.readFile(getFixturePath('courses.html'), 'utf-8');
-  const imagePaths = await copyResourses(url, tempDir, data);
-  const actual = replaceUrls(data, imagePaths);
-  const expected = await fs.readFile(getFixturePath('coursesResult.html'), 'utf-8');
-  expect(actual).toEqual(expected);
-});
-
-test('change urls in otherResourses html file', async () => {
-  const data = await fs.readFile(getFixturePath('otherResourses.html'), 'utf-8');
-  const imagePaths = await copyResourses(url, tempDir, data);
-  const actual = replaceUrls(data, imagePaths);
-  const expected = await fs.readFile(getFixturePath('otherResoursesResult.html'), 'utf-8');
-  expect(actual).toEqual(expected);
+describe('library throw errors', () => {
+  test('throw network error', async () => {
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .replyWithError('Network Error');
+    await expect(pageLoader(url, tempDir)).rejects.toThrow('Network Error');
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(2);
+  });
+  test('network error (connection problem)', async () => {
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .replyWithError('ENOTFOUND');
+    await expect(pageLoader(url, tempDir)).rejects.toThrow('ENOTFOUND');
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(2);
+  });
+  test('more network error (loading resources)', async () => {
+    const htmlToResponse = await readFixtureFile('otherResourses.html');
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/professions/nodejs.png')
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
+      .get('/packs/js/runtime.js')
+      .replyWithFile(200, getFixturePath('runtime.js'), {
+        'Cotent-Type': 'text/javascript',
+      })
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/application.css')
+      .replyWithError('Unathorized');
+    await expect(pageLoader(url, tempDir)).rejects.toThrow('Unathorized');
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(2);
+  });
+  test('throw file system error', async () => {
+    const htmlToResponse = await readFixtureFile('otherResourses.html');
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/professions/nodejs.png')
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/application.css')
+      .replyWithFile(200, getFixturePath('application.css'), {
+        'Cotent-Type': 'text/css',
+      })
+      .get('/packs/js/runtime.js')
+      .replyWithFile(200, getFixturePath('runtime.js'), {
+        'Cotent-Type': 'text/javascript',
+      });
+    const pathWithDeniedPermission = '/private/var/folders';
+    await expect(pageLoader(url, pathWithDeniedPermission)).rejects.toThrow('EACCES');
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(2);
+  });
 });

@@ -3,11 +3,12 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
 import Listr from 'listr';
-import { mkdir, access } from 'node:fs/promises';
+import debug from 'debug';
+import { mkdir } from 'node:fs/promises';
 import { URL } from 'url';
 
 const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFilePath, urls) => {
-  console.log({ requestUrls, projectDir });
+  // console.log({ requestUrls, projectDir });
   const requestsMap = [];
   const tasks = new Listr(
     requestUrls.map((requestUrl, idx) => ({
@@ -18,12 +19,17 @@ const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFi
           url: requestUrl,
           responseType: 'arraybuffer',
           encoding: null,
-        }).catch(() => { throw new Error('directory does not exist'); });
+        });
+        debug(`page-loader: resource ${requestUrl} was successfully loaded`);
         const downloadedResoursesPath = downloadedResoursesPaths[idx];
         const imagePath = projectDir + downloadedResoursesPath;
         const urlAttr = Object.values(urls).map((elem) => elem.attr);
         const urlPath = Object.keys(urls).map((elem) => elem);
-        await fs.writeFile(imagePath, response.data);
+        await fs.writeFile(imagePath, response.data).catch((e) => {
+          debug(`page-loader: error while loading
+          resource ${requestUrl}: ${JSON.stringify(e)}`);
+          return Promise.reject(e);
+        });
         requestsMap.push([[urlPath[idx]], {
           attr: urlAttr[idx],
           newPath: newFilePath + downloadedResoursesPath,
