@@ -19,6 +19,7 @@ let tempDir;
 
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+  nock.enableNetConnect('ru.hexlet.io');
   if (!nock.isActive()) {
     nock.activate();
   }
@@ -26,7 +27,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   tempDir = null;
-  nock.disableNetConnect();
+  nock.restore();
 });
 
 describe('return correct path', () => {
