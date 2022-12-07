@@ -21,7 +21,7 @@ program
     pageLoader(url, options.output)
       .then((result) => {
         console.log(`Page was successfully downloaded into '${result}'`);
-        process.exit();
+        process.exit(0);
       })
       .catch((error) => {
         console.error('[ERR]', configureErrorOutput(error), '\n', error);

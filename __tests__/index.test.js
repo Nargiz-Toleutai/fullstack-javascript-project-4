@@ -73,7 +73,7 @@ describe('checks files existence and its content', () => {
     const expectedHtml = await readFixtureFile('coursesResult.html');
     const expectedImage = await readFixtureFile('nodejs.png');
     const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
-    // console.log({ aa: createReadStream(getFixturePath('nodejs.png')) });
+
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, htmlToResponse)
