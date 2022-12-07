@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable import/extensions */
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
@@ -19,7 +20,7 @@ let tempDir;
 
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  nock.enableNetConnect('ru.hexlet.io');
+  nock.enableNetConnect();
   if (!nock.isActive()) {
     nock.activate();
   }
@@ -36,7 +37,10 @@ describe('return correct path', () => {
   test('in default directory', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
-      .reply(200, 'OK');
+      .reply(200, 'OK')
+      .on('error', (err) => {
+        console.error(err);
+      });
 
     const tmpPageFilePath = path.join(tempDir, filename);
     const actual = await pageLoader(url, tempDir);
@@ -47,7 +51,10 @@ describe('return correct path', () => {
   test('in optional directory', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
-      .reply(200, 'OK');
+      .reply(200, 'OK')
+      .on('error', (err) => {
+        console.error(err);
+      });
     const optionalDirectoryPath = '/var/tmp';
     const tmpPageDirpath = path.join(tempDir, optionalDirectoryPath);
     await fs.mkdir(tmpPageDirpath, { recursive: true });
@@ -66,7 +73,10 @@ describe('checks files existence and its content', () => {
       .get('/courses')
       .reply(200, responseHtml)
       .get('/assets/professions/nodejs.png')
-      .reply(200, () => createReadStream(getFixturePath('nodejs.png')));
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
+      .on('error', (err) => {
+        console.error(err);
+      });
 
     const result = await pageLoader(url, tempDir);
     const resultedHtml = await fs.readFile(result, 'utf-8');
@@ -83,7 +93,10 @@ describe('checks files existence and its content', () => {
       .get('/courses')
       .reply(200, htmlToResponse)
       .get('/assets/professions/nodejs.png')
-      .reply(200, () => createReadStream(getFixturePath('nodejs.png')));
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
+      .on('error', (err) => {
+        console.error(err);
+      });
 
     const result = await pageLoader(url, tempDir);
     const resultedHtml = await fs.readFile(result, 'utf-8');
@@ -118,7 +131,10 @@ describe('checks files existence and its content', () => {
         'Cotent-Type': 'text/javascript',
       })
       .get('/assets/professions/nodejs.png')
-      .reply(200, () => createReadStream(getFixturePath('nodejs.png')));
+      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
+      .on('error', (err) => {
+        console.error(err);
+      });
 
     const result = await pageLoader(url, tempDir);
     const resultedHtml = await fs.readFile(result, 'utf-8');
@@ -144,7 +160,10 @@ describe('library throw errors', () => {
   test('throw network error', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
-      .replyWithError('Network Error');
+      .replyWithError('Network Error')
+      .on('error', (err) => {
+        console.error(err);
+      });
     await expect(pageLoader(url, tempDir)).rejects.toThrow('Network Error');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
@@ -152,7 +171,10 @@ describe('library throw errors', () => {
   test('network error (connection problem)', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
-      .replyWithError('ENOTFOUND');
+      .replyWithError('ENOTFOUND')
+      .on('error', (err) => {
+        console.error(err);
+      });
     await expect(pageLoader(url, tempDir)).rejects.toThrow('ENOTFOUND');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
@@ -171,7 +193,10 @@ describe('library throw errors', () => {
       .get('/courses')
       .reply(200, htmlToResponse)
       .get('/assets/application.css')
-      .replyWithError('Unathorized');
+      .replyWithError('Unathorized')
+      .on('error', (err) => {
+        console.error(err);
+      });
     await expect(pageLoader(url, tempDir)).rejects.toThrow('Unathorized');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
@@ -192,6 +217,9 @@ describe('library throw errors', () => {
       .get('/packs/js/runtime.js')
       .replyWithFile(200, getFixturePath('runtime.js'), {
         'Cotent-Type': 'text/javascript',
+      })
+      .on('error', (err) => {
+        console.error(err);
       });
     const pathWithDeniedPermission = '/private/var/folders';
     await expect(pageLoader(url, pathWithDeniedPermission)).rejects.toThrow('EACCES');
