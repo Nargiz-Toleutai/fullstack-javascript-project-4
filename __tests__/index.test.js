@@ -26,7 +26,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   tempDir = null;
-  nock.restore();
+  nock.disableNetConnect();
 });
 
 describe('return correct path', () => {
