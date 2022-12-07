@@ -19,10 +19,14 @@ let tempDir;
 
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+  if (!nock.isActive()) {
+    nock.activate();
+  }
 });
 
 afterEach(() => {
   tempDir = null;
+  nock.restore();
 });
 
 describe('return correct path', () => {
