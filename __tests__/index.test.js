@@ -18,17 +18,19 @@ const url = 'https://ru.hexlet.io/courses';
 
 let tempDir;
 
+nock.disableNetConnect();
+
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  nock.enableNetConnect();
-  if (!nock.isActive()) {
-    nock.activate();
-  }
+  // nock.enableNetConnect();
+  // if (!nock.isActive()) {
+  //   nock.activate();
+  // }
 });
 
 afterEach(() => {
   tempDir = null;
-  nock.restore();
+  // nock.restore();
 });
 
 describe('return correct path', () => {
