@@ -22,15 +22,10 @@ nock.disableNetConnect();
 
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  // nock.enableNetConnect();
-  // if (!nock.isActive()) {
-  //   nock.activate();
-  // }
 });
 
 afterEach(() => {
   tempDir = null;
-  // nock.restore();
 });
 
 describe('return correct path', () => {

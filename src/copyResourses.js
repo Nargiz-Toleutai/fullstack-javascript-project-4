@@ -7,8 +7,9 @@ import debug from 'debug';
 import { mkdir } from 'node:fs/promises';
 import { URL } from 'url';
 
+// const debugPageLoader = debug('page-loader');
+
 const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFilePath, urls) => {
-  // console.log({ requestUrls, projectDir });
   const requestsMap = [];
   const tasks = new Listr(
     requestUrls.map((requestUrl, idx) => ({
@@ -18,6 +19,8 @@ const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFi
           method: 'get',
           url: requestUrl,
           responseType: 'arraybuffer',
+          maxRedirects: 1,
+          timeout: 500,
           encoding: null,
         });
         debug(`page-loader: resource ${requestUrl} was successfully loaded`);
