@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
-/* eslint-disable import/extensions */
-import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
 import path from 'path';
 import os from 'os';
 import nock from 'nock';
 import { createReadStream } from 'fs';
-import pageLoader from '../src/index.js';
+import pageLoader from '../src/index';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
