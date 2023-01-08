@@ -169,7 +169,6 @@ describe('library throw errors', () => {
   });
   test('more network error (loading resources)', async () => {
     const htmlToResponse = await readFixtureFile('otherResourses.html');
-    
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, htmlToResponse)
