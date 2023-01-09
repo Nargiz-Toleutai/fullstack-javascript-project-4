@@ -208,7 +208,7 @@ describe('library throw errors', () => {
       .on('error', () => {
       });
     const pathWithDeniedPermission = '/private/var/folders';
-    await expect(pageLoader(url, pathWithDeniedPermission)).rejects.toThrow('EACCES');
+    await expect(pageLoader(url, pathWithDeniedPermission)).rejects.toThrow("ENOENT: no such file or directory, open 'Error: EACCES: permission denied, mkdir '/private/var/folders/ru-hexlet-io-courses_files'/ru-hexlet-io-courses.html'");
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
   });
