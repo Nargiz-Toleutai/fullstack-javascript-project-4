@@ -20,7 +20,7 @@ const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFi
           url: requestUrl,
           responseType: 'arraybuffer',
           maxRedirects: 1,
-          timeout: 500,
+          timeout: 5000,
           encoding: null,
         });
         debug(`page-loader: resource ${requestUrl} was successfully loaded`);
