@@ -39,7 +39,7 @@ describe('return correct path', () => {
 
     const tmpPageFilePath = path.join(tempDir, filename);
     const actual = await pageLoader(url, tempDir);
-  
+
     expect(scope.isDone()).toBe(true);
     expect(actual).toBe(tmpPageFilePath);
   });
@@ -141,7 +141,7 @@ describe('checks files existence and its content', () => {
     const resultedRelatedHtml = await fs.readFile(downloadedRelatedHtmlPath, 'utf-8');
     const downloadedJSPath = path.join(tempDir, 'ru-hexlet-io-courses_files', JSFilename);
     const resultedJS = await fs.readFile(downloadedJSPath, 'utf-8');
- 
+
     expect(scope.isDone()).toBe(true);
     expect(resultedHtml.trim()).toBe(expectedHtml.trim());
     expect(resultedCSS.trim()).toBe(expectedCSS.trim());
