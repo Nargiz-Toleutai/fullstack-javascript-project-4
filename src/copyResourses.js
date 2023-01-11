@@ -71,10 +71,14 @@ const createProjectDir = async (currentDir, newFilePath) => {
 const findResourses = (data, host, protocol) => {
   const $ = cheerio.load(data);
 
+  // aaa.com
+  // aaa.com/styles.css
+  // b.aaa.com/styles.css
+
   const findLinks = (sel, attr) => Object.fromEntries($('html').find(sel).toArray()
     .map((el) => $(el).attr(attr))
     .filter(Boolean)
-    .filter((elem) => elem.match(host) || !elem.startsWith(protocol))
+    .filter((elem) => (new RegExp(`https?:\\/\\/${host}`)).test(elem) || !elem.startsWith(protocol))
     .map((elem) => [elem, { attr }]));
 
   return Object.assign(...[
