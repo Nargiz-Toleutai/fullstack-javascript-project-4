@@ -97,11 +97,11 @@ const copyResourses = async (pagePath, currentDir, data) => {
     .concat('_files');
 
   const urls = findResourses(data, host, protocol);
-  console.log({ urls });
+
   const requestUrls = Object.keys(urls).map((elem) => ((elem.match(origin))
     ? elem
     : `${protocol}//${host}${elem}`));
-
+  console.log({ requestUrls });
   const downloadedResoursesPaths = resoursesPaths(Object.keys(urls), host, origin);
 
   const projectDir = await createProjectDir(currentDir, newFilePath);
