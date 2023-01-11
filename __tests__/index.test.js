@@ -18,13 +18,13 @@ let tempDir;
 
 beforeEach(async () => {
   nock.disableNetConnect();
-  nock.enableNetConnect('ru.hexlet.io');
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
 afterEach(() => {
   tempDir = null;
   nock.cleanAll();
+  nock.enableNetConnect('ru.hexlet.io');
 });
 
 describe('return correct path', () => {
