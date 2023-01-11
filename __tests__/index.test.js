@@ -22,8 +22,9 @@ beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
-afterEach(() => {
+afterAll(() => {
   tempDir = null;
+  nock.enableNetConnect();
 });
 
 describe('return correct path', () => {
@@ -210,5 +211,3 @@ describe('library throw errors', () => {
     expect.assertions(2);
   });
 });
-
-nock.enableNetConnect();
