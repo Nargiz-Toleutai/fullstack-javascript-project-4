@@ -18,7 +18,7 @@ let tempDir;
 
 beforeEach(async () => {
   nock.disableNetConnect();
-  nock.enableNetConnect('site.com');
+  nock.enableNetConnect('cdn2.hexlet.io');
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
