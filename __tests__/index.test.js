@@ -24,6 +24,7 @@ beforeEach(async () => {
 
 afterAll(() => {
   tempDir = null;
+  nock.clear();
   nock.enableNetConnect();
 });
 
