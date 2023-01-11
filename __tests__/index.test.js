@@ -24,7 +24,7 @@ beforeEach(async () => {
 afterEach(() => {
   tempDir = null;
   nock.cleanAll();
-  nock.enableNetConnect('ru.hexlet.io');
+  nock.enableNetConnect();
 });
 
 describe('return correct path', () => {
