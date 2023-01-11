@@ -16,16 +16,12 @@ const url = 'https://ru.hexlet.io/courses';
 
 let tempDir;
 
-nock.disableNetConnect();
-
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
 afterAll(() => {
   tempDir = null;
-  nock.clear();
-  nock.enableNetConnect();
 });
 
 describe('return correct path', () => {
