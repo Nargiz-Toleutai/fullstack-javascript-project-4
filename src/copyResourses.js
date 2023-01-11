@@ -98,7 +98,7 @@ const copyResourses = async (pagePath, currentDir, data) => {
 
   const urls = findResourses(data, host, protocol);
 
-  const requestUrls = Object.keys(urls).map((elem) => ((elem.match(origin))
+  const requestUrls = Object.keys(urls).map((elem) => ((elem.startsWith(protocol))
     ? elem
     : `${protocol}//${host}${elem}`));
   console.log({ requestUrls });
