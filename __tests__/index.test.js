@@ -16,9 +16,8 @@ const url = 'https://ru.hexlet.io/courses';
 
 let tempDir;
 
-nock.disableNetConnect();
-
 beforeEach(async () => {
+  nock.disableNetConnect();
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
