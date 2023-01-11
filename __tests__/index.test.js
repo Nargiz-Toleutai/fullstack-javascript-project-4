@@ -4,8 +4,8 @@ import path from 'path';
 import os from 'os';
 import nock from 'nock';
 import { createReadStream } from 'fs';
+import { afterAll, beforeAll } from '@jest/globals';
 import pageLoader from '../src/index';
-import { afterAll, afterEach, beforeAll } from '@jest/globals';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
