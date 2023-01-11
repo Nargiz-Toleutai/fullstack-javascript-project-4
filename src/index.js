@@ -17,7 +17,7 @@ export const replaceUrls = (data, imagePaths) => {
 };
 
 const pageLoader = async (requestUrl, currentDir) => {
-  if (!requestUrl) { throw new Error('no request url provided'); }
+  if (!requestUrl || !currentDir) { throw new Error('no request url or currentDir provided'); }
   const data = await axios.get(requestUrl).catch((e) => {
     throw new Error(e);
   });
@@ -28,9 +28,7 @@ const pageLoader = async (requestUrl, currentDir) => {
   const newUrl = url.replace(protocol, '');
   const reg = /[^a-z0-9-]+/g;
   const newFilePath = newUrl.replace(reg, '-').slice(1).concat('.html');
-  console.log({ currentDir, newFilePath });
   const fullPath = path.resolve(currentDir, newFilePath);
-  
   const imagePaths = await copyResourses(requestUrl, currentDir, data.data);
   const result = replaceUrls(data.data, imagePaths);
   await fs.writeFile(fullPath, result);
