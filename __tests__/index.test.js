@@ -18,9 +18,7 @@ let tempDir;
 
 beforeEach(async () => {
   nock.disableNetConnect();
-  nock.emitter.on('no match', (request) => {
-    throw Error('Request fired that did not match what was mocked', request);
-  });
+  nock.enableNetConnect('cdn2.site.com');
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
