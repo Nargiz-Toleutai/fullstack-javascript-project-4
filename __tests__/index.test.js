@@ -198,4 +198,15 @@ describe('library throw errors', () => {
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
   });
+  test('disallowed net connect', async () => {
+    const scope = await nock('https://ru.hexlet.io')
+      .get('/courses')
+      .replyWithError('ENETUNREACH')
+      .on('error', (err) => {
+        console.error(err);
+      });
+    await expect(pageLoader(url, tempDir)).rejects.toThrow('ENETUNREACH');
+    expect(scope.isDone()).toBe(true);
+    expect.assertions(2);
+  });
 });
