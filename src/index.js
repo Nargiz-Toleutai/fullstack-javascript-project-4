@@ -17,7 +17,9 @@ export const replaceUrls = (data, imagePaths) => {
 };
 
 const pageLoader = async (requestUrl, currentDir) => {
-  if (!requestUrl || !currentDir) { throw new Error('no request url or currentDir provided'); }
+  if (!requestUrl) { throw new Error('no request url or currentDir provided'); }
+  // eslint-disable-next-line no-param-reassign
+  if (!currentDir) { currentDir = process.cwd(); }
   const data = await axios.get(requestUrl).catch((e) => {
     throw new Error(e);
   });
