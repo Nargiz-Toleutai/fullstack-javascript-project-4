@@ -30,7 +30,7 @@ describe('return correct path', () => {
   const filename = 'ru-hexlet-io-courses.html';
 
   test('in default directory', async () => {
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, 'OK')
       .on('error', (err) => {
@@ -45,7 +45,7 @@ describe('return correct path', () => {
   });
 
   test('in optional directory', async () => {
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, 'OK')
       .on('error', (err) => {
@@ -65,7 +65,7 @@ describe('checks files existence and its content', () => {
   test('in default directory', async () => {
     const responseHtml = await readFixtureFile('courses.html');
     const expectedHtml = await readFixtureFile('ru-hexlet-io-courses.html');
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, responseHtml)
       .get('/assets/professions/nodejs.png')
@@ -86,7 +86,7 @@ describe('checks files existence and its content', () => {
     const expectedImage = await readFixtureFile('nodejs.png');
     const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
 
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, htmlToResponse)
       .get('/assets/professions/nodejs.png')
@@ -113,7 +113,7 @@ describe('checks files existence and its content', () => {
     const expectedJS = await readFixtureFile('runtime.js');
     const JSFilename = 'ru-hexlet-io-packs-js-runtime.js';
 
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, htmlToResponse)
       .get('/assets/application.css')
@@ -154,7 +154,7 @@ describe('checks files existence and its content', () => {
 
 describe('library throw errors', () => {
   test('throw network error', async () => {
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
       .replyWithError('Network Error')
       .on('error', (err) => {
@@ -165,7 +165,7 @@ describe('library throw errors', () => {
     expect.assertions(2);
   });
   test('network error (connection problem)', async () => {
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
       .replyWithError('ENOTFOUND')
       .on('error', (err) => {
@@ -176,19 +176,8 @@ describe('library throw errors', () => {
     expect.assertions(2);
   });
   test('more network error (loading resources)', async () => {
-    const htmlToResponse = await readFixtureFile('otherResourses.html');
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
-      .reply(200, htmlToResponse)
-      .get('/assets/professions/nodejs.png')
-      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
-      .get('/packs/js/runtime.js')
-      .replyWithFile(200, getFixturePath('runtime.js'), {
-        'Cotent-Type': 'text/javascript',
-      })
-      .get('/courses')
-      .reply(200, htmlToResponse)
-      .get('/assets/application.css')
       .replyWithError('Unathorized')
       .on('error', (err) => {
         console.error(err);
@@ -198,19 +187,8 @@ describe('library throw errors', () => {
     expect.assertions(2);
   });
   test('throw file system error', async () => {
-    const htmlToResponse = await readFixtureFile('otherResourses.html');
-    const scope = nock('https://ru.hexlet.io')
+    const scope = await nock('https://ru.hexlet.io')
       .get('/courses')
-      .reply(200, htmlToResponse)
-      .get('/assets/professions/nodejs.png')
-      .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
-      .get('/courses')
-      .reply(200, htmlToResponse)
-      .get('/assets/application.css')
-      .replyWithFile(200, getFixturePath('application.css'), {
-        'Cotent-Type': 'text/css',
-      })
-      .get('/packs/js/runtime.js')
       .replyWithError('EACCES: permission denied')
       .on('error', (err) => {
         console.error(err);

@@ -19,7 +19,6 @@ const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFi
           method: 'get',
           url: requestUrl,
           responseType: 'arraybuffer',
-          maxRedirects: 1,
           timeout: 5000,
           encoding: null,
         });
