@@ -30,6 +30,7 @@ const pageLoader = async (requestUrl, currentDir) => {
   const newFilePath = newUrl.replace(reg, '-').slice(1).concat('.html');
 
   const fullPath = path.resolve(currentDir, newFilePath);
+  console.log({ fullPath });
   const imagePaths = await copyResourses(requestUrl, currentDir, data.data);
   const result = replaceUrls(data.data, imagePaths);
   await fs.writeFile(fullPath, result);

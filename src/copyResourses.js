@@ -7,8 +7,6 @@ import debug from 'debug';
 import { mkdir } from 'node:fs/promises';
 import { URL } from 'url';
 
-// const debugPageLoader = debug('page-loader');
-
 const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFilePath, urls) => {
   const requestsMap = [];
   const tasks = new Listr(
@@ -71,10 +69,6 @@ const createProjectDir = async (currentDir, newFilePath) => {
 const findResourses = (data, host, protocol) => {
   const $ = cheerio.load(data);
 
-  // aaa.com
-  // aaa.com/styles.css
-  // b.aaa.com/styles.css
-
   const findLinks = (sel, attr) => Object.fromEntries($('html').find(sel).toArray()
     .map((el) => $(el).attr(attr))
     .filter(Boolean)
@@ -105,7 +99,7 @@ const copyResourses = async (pagePath, currentDir, data) => {
   const requestUrls = Object.keys(urls).map((elem) => ((elem.startsWith(protocol))
     ? elem
     : `${protocol}//${host}${elem}`));
-  console.log({ requestUrls });
+
   const downloadedResoursesPaths = resoursesPaths(Object.keys(urls), host, origin);
 
   const projectDir = await createProjectDir(currentDir, newFilePath);
