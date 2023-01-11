@@ -18,6 +18,7 @@ let tempDir;
 
 beforeEach(async () => {
   nock.disableNetConnect();
+  nock.enableNetConnect('127.0.0.1');
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
