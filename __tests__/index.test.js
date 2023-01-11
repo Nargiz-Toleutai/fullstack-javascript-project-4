@@ -5,6 +5,7 @@ import os from 'os';
 import nock from 'nock';
 import { createReadStream } from 'fs';
 import pageLoader from '../src/index';
+import { afterAll, afterEach, beforeAll } from '@jest/globals';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +17,14 @@ const url = 'https://ru.hexlet.io/courses';
 
 let tempDir;
 
-nock.disableNetConnect();
+beforeAll(() => {
+  nock.disableNetConnect();
+});
+
+afterAll(() => {
+  nock.cleanAll();
+  nock.enableNetConnect();
+});
 
 beforeEach(async () => {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
