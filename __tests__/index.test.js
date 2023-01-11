@@ -18,12 +18,13 @@ let tempDir;
 
 beforeEach(async () => {
   nock.disableNetConnect();
-  nock.enableNetConnect('cdn2.site.com');
+  nock.enableNetConnect('site.com');
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 });
 
 afterEach(() => {
   tempDir = null;
+  nock.cleanAll();
 });
 
 describe('return correct path', () => {
