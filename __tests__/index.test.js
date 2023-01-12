@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 /* eslint-disable no-undef */
 import os from 'os';
 import nock from 'nock';
@@ -91,5 +92,3 @@ describe('Throwed exceptions', () => {
     await expect(downloadPage('https://example.com', '/notExistingFolder')).rejects.toThrow("EACCES: permission denied, mkdir '/notExistingFolder'");
   });
 });
-
-
