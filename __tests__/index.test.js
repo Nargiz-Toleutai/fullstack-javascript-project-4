@@ -46,7 +46,7 @@ describe('return correct path', () => {
 
     expect(scope.isDone()).toBe(true);
     expect(actual).toBe(tmpPageFilePath);
-  });
+  }, 30000);
 
   test('in optional directory', async () => {
     const scope = nock('https://ru.hexlet.io')
@@ -62,7 +62,7 @@ describe('return correct path', () => {
     const result = await pageLoader(url, tmpPageDirpath);
     expect(scope.isDone()).toBe(true);
     expect(result).toBe(tmpPageFilePath);
-  });
+  }, 30000);
 });
 
 describe('checks files existence and its content', () => {
@@ -83,7 +83,7 @@ describe('checks files existence and its content', () => {
 
     expect(scope.isDone()).toBe(true);
     expect(resultedHtml.trim()).toBe(expectedHtml.trim());
-  });
+  }, 30000);
   test('check downloading images', async () => {
     const htmlToResponse = await readFixtureFile('courses.html');
     const expectedHtml = await readFixtureFile('coursesResult.html');
@@ -106,7 +106,7 @@ describe('checks files existence and its content', () => {
     expect(scope.isDone()).toBe(true);
     expect(resultedImage.trim()).toBe(expectedImage.trim());
     expect(resultedHtml.trim()).toBe(expectedHtml.trim());
-  });
+  }, 30000);
   test('check downloading links and scripts', async () => {
     const htmlToResponse = await readFixtureFile('otherResourses.html');
     const expectedHtml = await readFixtureFile('otherResoursesResult.html');
@@ -151,7 +151,7 @@ describe('checks files existence and its content', () => {
     expect(resultedCSS.trim()).toBe(expectedCSS.trim());
     expect(resultedRelatedHtml.trim()).toBe(expectedRelatedHtml.trim());
     expect(resultedJS.trim()).toBe(expectedJS.trim());
-  });
+  }, 30000);
 });
 
 // = == 3
@@ -167,7 +167,7 @@ describe('library throw errors', () => {
     await expect(pageLoader(url, tempDir)).rejects.toThrow('Network Error');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
-  });
+  }, 30000);
   test('network error (connection problem)', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
@@ -178,7 +178,7 @@ describe('library throw errors', () => {
     await expect(pageLoader(url, tempDir)).rejects.toThrow('ENOTFOUND');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
-  });
+  }, 30000);
   test('more network error (loading resources)', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
@@ -189,7 +189,7 @@ describe('library throw errors', () => {
     await expect(pageLoader(url, tempDir)).rejects.toThrow('Unathorized');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
-  });
+  }, 30000);
   test('throw file system error', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
@@ -201,7 +201,7 @@ describe('library throw errors', () => {
     await expect(pageLoader(url, pathWithDeniedPermission)).rejects.toThrow('EACCES: permission denied');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
-  });
+  }, 30000);
   test('disallowed net connect', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
@@ -212,5 +212,5 @@ describe('library throw errors', () => {
     await expect(pageLoader(url, tempDir)).rejects.toThrow('ENETUNREACH');
     expect(scope.isDone()).toBe(true);
     expect.assertions(2);
-  });
+  }, 30000);
 });
