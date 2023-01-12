@@ -21,6 +21,7 @@ const pageLoader = async (requestUrl, currentDir) => {
   // eslint-disable-next-line no-param-reassign
   if (!currentDir) { currentDir = process.cwd(); }
   const data = await axios.get(requestUrl).catch((e) => {
+    console.log({e})
     throw new Error(e);
   });
   debug('page-loader: pageLoader')(`${data.data}`);
