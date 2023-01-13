@@ -17,11 +17,29 @@ const url = 'https://ru.hexlet.io/courses';
 
 let tempDir;
 
-beforeAll(() => {
-  nock.disableNetConnect();
+nock.disableNetConnect();
+
+let data;
+let changeData;
+let imageData;
+let htmlToResponse;
+let expectedHtml;
+let expectedCSS;
+let expectedJS;
+let expectedRelatedHtml;
+
+beforeAll(async () => {
+  data = await readFixtureFile('courses.html');
+  changeData = await readFixtureFile('coursesResult.html');
+  imageData = await readFixtureFile('nodejs.png');
+  htmlToResponse = await readFixtureFile('otherResourses.html');
+  expectedHtml = await readFixtureFile('otherResoursesResult.html');
+  expectedCSS = await readFixtureFile('application.css');
+  expectedJS = await readFixtureFile('runtime.js');
+  expectedRelatedHtml = await readFixtureFile('otherResourses.html');
 });
 
-afterAll(() => {
+afterAll(async () => {
   nock.cleanAll();
   nock.enableNetConnect();
 });
@@ -32,7 +50,6 @@ beforeEach(async () => {
 
 describe('return correct path', () => {
   const filename = 'ru-hexlet-io-courses.html';
-
   test('in default directory', async () => {
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
@@ -67,11 +84,10 @@ describe('return correct path', () => {
 
 describe('checks files existence and its content', () => {
   test('in default directory', async () => {
-    const responseHtml = await readFixtureFile('courses.html');
-    const expectedHtml = await readFixtureFile('ru-hexlet-io-courses.html');
+    const expected = await readFixtureFile('ru-hexlet-io-courses.html');
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
-      .reply(200, responseHtml)
+      .reply(200, data)
       .get('/assets/professions/nodejs.png')
       .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
       .on('error', (err) => {
@@ -82,17 +98,14 @@ describe('checks files existence and its content', () => {
     const resultedHtml = await fs.readFile(result, 'utf-8');
 
     expect(scope.isDone()).toBe(true);
-    expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+    expect(resultedHtml.trim()).toBe(expected.trim());
   });
   test('check downloading images', async () => {
-    const htmlToResponse = await readFixtureFile('courses.html');
-    const expectedHtml = await readFixtureFile('coursesResult.html');
-    const expectedImage = await readFixtureFile('nodejs.png');
     const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
 
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
-      .reply(200, htmlToResponse)
+      .reply(200, data)
       .get('/assets/professions/nodejs.png')
       .reply(200, () => createReadStream(getFixturePath('nodejs.png')))
       .on('error', (err) => {
@@ -104,17 +117,12 @@ describe('checks files existence and its content', () => {
     const downloadedImagePath = path.join(tempDir, 'ru-hexlet-io-courses_files', imageFilename);
     const resultedImage = await fs.readFile(downloadedImagePath, 'utf-8');
     expect(scope.isDone()).toBe(true);
-    expect(resultedImage.trim()).toBe(expectedImage.trim());
-    expect(resultedHtml.trim()).toBe(expectedHtml.trim());
+    expect(resultedImage.trim()).toBe(imageData.trim());
+    expect(resultedHtml.trim()).toBe(changeData.trim());
   });
   test('check downloading links and scripts', async () => {
-    const htmlToResponse = await readFixtureFile('otherResourses.html');
-    const expectedHtml = await readFixtureFile('otherResoursesResult.html');
-    const expectedCSS = await readFixtureFile('application.css');
     const CSSFilename = 'ru-hexlet-io-assets-application.css';
-    const expectedRelatedHtml = await readFixtureFile('otherResourses.html');
     const relatedHtmlFilename = 'ru-hexlet-io-courses.html';
-    const expectedJS = await readFixtureFile('runtime.js');
     const JSFilename = 'ru-hexlet-io-packs-js-runtime.js';
 
     const scope = nock('https://ru.hexlet.io')
@@ -154,7 +162,7 @@ describe('checks files existence and its content', () => {
   });
 });
 
-// = == 3
+//= == 3
 
 describe('library throw errors', () => {
   test('throw network error', async () => {
@@ -214,6 +222,7 @@ describe('library throw errors', () => {
     expect.assertions(2);
   });
 });
+
 describe('Throwed exceptions', () => {
   test('Http errors', async () => {
     nock('https://foo.bar.baz')
