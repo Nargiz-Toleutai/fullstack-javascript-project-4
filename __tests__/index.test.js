@@ -246,7 +246,7 @@ describe('Throwed exceptions', () => {
       .twice()
       .reply(200);
 
-    await expect(pageLoader('https://example.com', '/sys')).rejects.toThrow("ENOENT: no such file or directory, open '/sys/example-com.html'");
-    await expect(pageLoader('https://example.com', '/notExistingFolder')).rejects.toThrow("ENOENT: no such file or directory, open '/notExistingFolder/example-com.html'");
+    await expect(pageLoader('https://example.com', '/sys')).rejects.toThrow("EACCES: permission denied, open '/sys/example-com.html'", open '/sys/example-com.html'");
+    await expect(pageLoader('https://example.com', '/notExistingFolder')).rejects.toThrow("EACCES: permission denied, open '/sys/example-com.html'", open '/notExistingFolder/example-com.html'");
   });
 });
