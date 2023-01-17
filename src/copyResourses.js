@@ -39,7 +39,6 @@ const requests = async (requestUrls, downloadedResoursesPaths, projectDir, newFi
     { concurrent: true },
   );
   await tasks.run();
-  console.log({res: Object.fromEntries(requestsMap)})
   return Object.fromEntries(requestsMap);
 };
 

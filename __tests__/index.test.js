@@ -141,7 +141,7 @@ describe('checks files existence and its content', () => {
         console.error(err);
       });
 
-    const result = await pageLoader(url, tempDir); // '/var/folders/xt/lbzljqq95fnd033dx73k59x40000gn/T/page-loader-f5tDqf/ru-hexlet-io-courses.html',
+    const result = await pageLoader(url, tempDir);
     const resultedHtml = await fs.readFile(result, 'utf-8'); // expectedHtml
     const resultedCSS = await fs.readFile(path.join(tempDir, filename, CSSFilename), 'utf-8'); // expectedCSS
     const resultedRelatedHtml = await fs.readFile(path.join(tempDir, filename, relatedHtmlFilename), 'utf-8'); // htmlToResponse
@@ -243,39 +243,3 @@ describe('Throwed exceptions', () => {
     await expect(pageLoader('https://example.com', '/notExistingFolder')).rejects.toThrow("ENOENT: no such file or directory, open '/notExistingFolder/example-com.html'");
   });
 });
-
-// describe('Positive download', () => {
-//   const CSSFilename = 'ru-hexlet-io-assets-application.css';
-//   const relatedHtmlFilename = 'ru-hexlet-io-courses.html';
-//   const JSFilename = 'ru-hexlet-io-packs-js-runtime.js';
-//   const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
-//   const filename = 'ru-hexlet-io-courses_files';
-
-//   test('Download page', async () => {
-//     const scope = nock('https://ru.hexlet.io')
-//       .get('/courses')
-//       .reply(200, htmlToResponse)
-//       .get('/assets/professions/nodejs.png')
-//       .reply(200, imageData)
-//       .get('/assets/application.css')
-//       .reply(200, expectedCSS)
-//       .get('/packs/js/runtime.js')
-//       .reply(200, expectedJS);
-
-//     const result = await pageLoader(url, tempDir); 
-//     const resultedHtml = await fs.readFile(result, 'utf-8');
-//     const expectedChangedata = await fs.readFile(path.join(tempDir, filename, relatedHtmlFilename), 'utf-8');
-//     const expectedImageData = await fs.readFile(path.join(tempDir, filename, imageFilename), 'utf-8');
-//     const expectedCssData = await fs.readFile(path.join(tempDir, filename, CSSFilename), 'utf-8');
-//     const expectedJsData = await fs.readFile(path.join(tempDir, filename, JSFilename), 'utf-8');
-    
-//     console.log({expectedCssData, expectedJsData, expectedChangedata, resultedHtml });
-
-//     expect(scope.isDone()).toBe(true);
-//     expect(resultedHtml).toEqual(expectedHtml);
-//     expect(expectedChangedata).toEqual(changeData);
-//     expect(expectedImageData).toEqual(imageData);
-//     expect(expectedCssData).toEqual(expectedCSS);
-//     expect(expectedJsData).toEqual(expectedJS);
-//   });
-// });
