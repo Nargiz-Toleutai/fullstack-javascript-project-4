@@ -83,6 +83,11 @@ describe('return correct path', () => {
 });
 
 describe('checks files existence and its content', () => {
+  const CSSFilename = 'ru-hexlet-io-assets-application.css';
+  const relatedHtmlFilename = 'ru-hexlet-io-courses.html';
+  const JSFilename = 'ru-hexlet-io-packs-js-runtime.js';
+  const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
+  const filename = 'ru-hexlet-io-courses_files';
   test('in default directory', async () => {
     const expected = await readFixtureFile('ru-hexlet-io-courses.html');
     const scope = nock('https://ru.hexlet.io')
@@ -101,8 +106,6 @@ describe('checks files existence and its content', () => {
     expect(resultedHtml.trim()).toBe(expected.trim());
   });
   test('check downloading images', async () => {
-    const imageFilename = 'ru-hexlet-io-assets-professions-nodejs.png';
-
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, data)
@@ -121,11 +124,6 @@ describe('checks files existence and its content', () => {
     expect(resultedHtml.trim()).toBe(changeData.trim());
   });
   test('check downloading links and scripts', async () => {
-    const CSSFilename = 'ru-hexlet-io-assets-application.css';
-    const relatedHtmlFilename = 'ru-hexlet-io-courses.html';
-    const JSFilename = 'ru-hexlet-io-packs-js-runtime.js';
-    const filename = 'ru-hexlet-io-courses_files';
-
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, htmlToResponse)
@@ -152,6 +150,33 @@ describe('checks files existence and its content', () => {
     expect(resultedCSS.trim()).toBe(expectedCSS.trim());
     expect(resultedRelatedHtml.trim()).toBe(expectedRelatedHtml.trim());
     expect(resultedJS.trim()).toBe(expectedJS.trim());
+  });
+  test('Download page', async () => {
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/application.css')
+      .reply(200, expectedCSS)
+      .get('/courses')
+      .reply(200, htmlToResponse)
+      .get('/assets/professions/nodejs.png')
+      .reply(200, imageData)
+      .get('/packs/js/runtime.js')
+      .reply(200, expectedJS);
+
+    const result = await pageLoader(url, tempDir);
+    const resultedHtml = await fs.readFile(result, 'utf-8');
+    const expectedChangedata = await fs.readFile(path.join(tempDir, relatedHtmlFilename), 'utf-8');
+
+    const expectedImageData = await fs.readFile(path.join(tempDir, filename, imageFilename), 'utf-8');
+    const expectedCssData = await fs.readFile(path.join(tempDir, filename, CSSFilename), 'utf-8');
+    const expectedJsData = await fs.readFile(path.join(tempDir, filename, JSFilename), 'utf-8');
+
+    expect(scope.isDone()).toBe(true);
+    expect(resultedHtml).toEqual(expectedChangedata);
+    expect(expectedImageData).toEqual(imageData);
+    expect(expectedCssData).toEqual(expectedCSS);
+    expect(expectedJsData).toEqual(expectedJS);
   });
 });
 
