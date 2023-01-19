@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander/esm.mjs';
+import { Command } from 'commander/esm';
+// eslint-disable-next-line import/extensions, import/no-unresolved
 import downloadPage from '../src/index.js';
 
 const program = new Command();

@@ -10,7 +10,7 @@ import Listr from 'listr';
 import prettier from 'prettier';
 import {
   nameChanger, normalizeName, getResoursesLinks, localizeLinks,
-} from './util.js';
+} from './util';
 
 const log = debug('page-loader');
 

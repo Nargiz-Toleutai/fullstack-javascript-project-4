@@ -4,7 +4,7 @@ import nock from 'nock';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fsp from 'fs/promises';
-import downloadPage from '../src/index.js';
+import downloadPage from '../src/index';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
