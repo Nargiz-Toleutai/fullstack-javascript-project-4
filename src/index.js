@@ -1,40 +1,79 @@
-/* eslint-disable import/extensions */
+/* eslint-disable no-shadow */
 import axios from 'axios';
-import fs from 'fs/promises';
+import { cwd } from 'node:process';
+import fsp from 'fs/promises';
 import path from 'path';
-import { URL } from 'url';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
+import axiosDebug from 'axios-debug-log';
 import debug from 'debug';
-import copyResourses from './copyResourses.js';
+import Listr from 'listr';
+import prettier from 'prettier';
+import {
+  nameChanger, normalizeName, getResoursesLinks, localizeLinks,
+} from './util.js';
 
-export const replaceUrls = (data, imagePaths) => {
-  const $ = cheerio.load(data);
-  // eslint-disable-next-line no-restricted-syntax
-  for (const [originalUrl, { attr, newPath }] of Object.entries(imagePaths)) {
-    $('html').find(`[${attr}="${originalUrl}"]`).attr(attr, newPath);
-  }
-  return $.html();
+const log = debug('page-loader');
+
+axiosDebug({
+  request(httpDebug, config) {
+    httpDebug(`Request ${config.url}`);
+  },
+  response(httpDebug, response) {
+    httpDebug(
+      `Response with ${response.headers['content-type']}`,
+      `from ${response.config.url}`,
+    );
+  },
+});
+
+const downloadResourses = (downloadLink, dirPath, srcName, link) => {
+  const task = axios.get(downloadLink, { responseType: 'arraybuffer' })
+    .then(({ data }) => fsp.writeFile(path.join(dirPath, srcName), data));
+  log(`Download resourse from ${downloadLink.href}`);
+  return { title: link, task: () => task };
 };
 
-const pageLoader = async (requestUrl, currentDir) => {
-  if (!requestUrl) { throw new Error('no request url or currentDir provided'); }
-  // eslint-disable-next-line no-param-reassign
-  if (!currentDir) { currentDir = process.cwd(); }
-  const data = await axios.get(requestUrl).catch((e) => {
-    throw new Error(e);
-  });
-  debug('page-loader: pageLoader')(`${data.data}`);
-  const { url } = data.config;
-  const urlData = new URL(url);
-  const { protocol } = urlData;
-  const newUrl = url.replace(protocol, '');
-  const reg = /[^a-z0-9-]+/g;
-  const newFilePath = newUrl.replace(reg, '-').slice(1).concat('.html');
-  const fullPath = path.resolve(currentDir, newFilePath);
-  const imagePaths = await copyResourses(requestUrl, currentDir, data.data);
-  const result = replaceUrls(data.data, imagePaths);
-  await fs.writeFile(fullPath, result);
-  return fullPath;
+const resourceProcessing = (filePath, url, fileName) => {
+  const dirName = `${fileName}_files`;
+  const dirPath = `${filePath}_files`;
+  const htmlFilePath = `${filePath}.html`;
+  const resourcesToLocalize = [];
+  let $;
+  return axios.get(url)
+    .then(({ data }) => {
+      $ = cheerio.load(data);
+      const linkForDownload = getResoursesLinks($, url);
+      if (linkForDownload.length === 0) {
+        console.error('No resourses for download');
+      }
+      const tasks = new Listr(
+        linkForDownload.map((link) => {
+          const downloadLink = new URL(link, url);
+          const srcName = normalizeName(downloadLink);
+          const relativePath = `${dirName}/${srcName}`;
+          resourcesToLocalize.push({ link, relativePath });
+          log(`Filename is ${srcName}`);
+          return downloadResourses(downloadLink.href, dirPath, srcName, link);
+        }),
+      );
+      return tasks.run();
+    })
+    .then(() => {
+      localizeLinks($, resourcesToLocalize);
+      log(`HTML filepath is ${htmlFilePath}`);
+      console.log(`Page was successfully downloaded into ${htmlFilePath}`);
+      return fsp.writeFile(htmlFilePath, prettier.format($.html(), { parser: 'html' }));
+    });
 };
 
-export default pageLoader;
+const downloadPage = (url, filePath = cwd()) => {
+  const fileName = nameChanger(url);
+  const resultPath = path.join(filePath, fileName);
+  log(`Resultpath is ${resultPath}`);
+  return fsp.access(filePath)
+    .catch(() => fsp.mkdir(filePath, { recursive: true }))
+    .then(() => fsp.mkdir(`${resultPath}_files`, { recursive: true }))
+    .then(() => resourceProcessing(`${resultPath}`, url, fileName));
+};
+
+export default downloadPage;
